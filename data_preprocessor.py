@@ -16,7 +16,7 @@ def preProcessData(filename):
     try:
         with open(filename, "r") as file:
             reader = csv.DictReader(file)
-
+            count = 0
             for row_data in reader:
                 temp_dict = dict(
                     last_name = row_data["Last Name"].strip() or "N/A",
@@ -35,6 +35,9 @@ def preProcessData(filename):
                 if key not in unique:
                     officials.append(temp_dict)
                     unique.add(key)
+                count +=1
+                if count > 100:
+                    break
                 # Uncomment Else-Block to Track Duplicate Entries.
                 # else:
                 #     duplicate_entries.append(temp_dict) 
