@@ -59,7 +59,7 @@ def getFeatures(rows, features):
 # Naive Bayes
 
 def trainNaiveBayes(X, y):
-    # the "model" is just a dictionary that stores all the counts we need
+    # A dictionary that stores all the counts we need
     numFeatures = len(X[0])
     classCount = {0: 0, 1: 0}
  
@@ -74,16 +74,16 @@ def trainNaiveBayes(X, y):
     for i in range(numFeatures):
         vocab.append(set())
  
-    # training is only counting, there is no loop that updates weights like perceptron
+    # training is only counting
     for row, c in zip(X, y):
         classCount[c] += 1
         for i in range(numFeatures):
             v = row[i]
-            # .get(v, 0) gives 0 the first time we see this value
+            # get(v, 0) gives 0 the first time we see this value
             valueCount[c][i][v] = valueCount[c][i].get(v, 0) + 1
             vocab[i].add(v)
  
-    # we only need the size of each vocab later for the smoothing
+    # we only need the size of each vocab later for the laplace smoothing
     vocabSize = []
     for i in range(numFeatures):
         vocabSize.append(len(vocab[i]))
@@ -110,8 +110,8 @@ def logScore(model, row, c):
         top = count + ALPHA
         bottom = model["classCount"][c] + ALPHA * (model["vocabSize"][i] + 1)
  
-        # naive part: we assume the features are independent so we just multiply
-        # we add the logs instead because multiplying many small numbers underflows
+        # Nave Bayes: we assume the features are independent so multiply
+        # we add the logs instead because multiplying many small numbers may cause underflow
         score += math.log(top / bottom)
  
     return score
@@ -122,13 +122,13 @@ def predictProba(model, row):
     s0 = logScore(model, row, 0)
     s1 = logScore(model, row, 1)
  
-    # the scores are not probabilities yet, we still need to normalize them
+    # the scores are not probabilities yet, We need normalization
     # subtract the bigger one first so exp() does not underflow to 0
     m = max(s0, s1)
     e0 = math.exp(s0 - m)
     e1 = math.exp(s1 - m)
  
-    # P(dynasty | row) = e1 / (e0 + e1), this is the percentage we report
+    # P(dynasty | row) = e1 / (e0 + e1), Percentage for the report
     return e1 / (e0 + e1)
  
  
