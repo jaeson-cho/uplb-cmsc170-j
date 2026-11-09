@@ -5,8 +5,8 @@ from data_preprocessor import preProcessData
 FILENAME = "NLE_Winners_2004-2025.csv"
 TRAIN_END_YEAR = 2016
 FEATURES = [
-    "last-name",
-    "middle-name",
+    "last_name",
+    "middle_name",
     "province",
     "city",
     "position"
@@ -181,6 +181,13 @@ def main():
             return
 
         rows = addLabels(officials)
+
+        #TESTING
+        print("First year:", min(row["year"] for row in rows))
+        print("Last year:", max(row["year"] for row in rows))
+        print("Years found:", sorted(set(row["year"] for row in rows)))
+
+
         train, test = splitData(rows)
 
         print(f"\nRows: {len(rows)}")
