@@ -38,13 +38,9 @@ def addLabels(officials):
     return local
 
 def splitData(rows):
-    train = []
-    test = []
-    for r in rows:
-        if r["year"] <= TRAIN_END_YEAR:
-            train.append(r)
-        else:
-            test.append(r)
+    train = rows[:75]
+    test = rows[75:100]
+
     return train, test
 
 def generateVocabulary(trainingSet, features):
@@ -85,7 +81,7 @@ def getNeighbors(trainingSet, testRow, k, p):
     distances = []
 
     for index, trainRow in enumerate(trainingSet):
-        distance = applyMinowski(testRow, testRow["features"], p)
+        distance = applyMinowski(testRow, trainRow["features"], p)
 
         distances.append([
             distance, 
