@@ -1,6 +1,7 @@
 import math
 import random
 from data_preprocessor import preProcessData
+import evaluation
 
 #Constants
 FILENAME = "NLE_Winners_2004-2025.csv"
@@ -15,6 +16,7 @@ FEATURES = [
 ]
 
 RANDOM_SEED = 42
+MAX_ITERATIONS = 100
 
 #labeling
 def addLabels(officials):
@@ -74,25 +76,22 @@ def generateVocabulary(trainingSet, features):
         )
     return vocab
 
-def getFeatures(rows, features, vocab):
-    x=[]
-    y=[]
-    print(f"feature {features}")
-    print(f"row {rows}")
+def encodeRows(rows, features, vocab):
+    # each row becomes a list of the spot numbers that are 1
+    # values that were not in the training data have no spot so we skip them
+    encoded = []
+    labels = []
     for row in rows:
-        encodedRow = []
+        spots = []
         for feature in features:
-            value = row[feature]
-            for category in vocab[feature]:
-                encodedRow.append(
-                    1.0 if value == category else 0.0
-                )
-            
-        x.append(encodedRow)
-        y.append(row["label"])
-    return x,y
+            pair = (feature, row[feature])
+            if pair in vocab:
+                spots.append(vocab[pair])
+        encoded.append(spots)
+        labels.append(row["label"])
+    return encoded, labels
 
-def generateInitialCentroids(trainingSet, k):
+def generateInitialCentroids(trainingSet, k, size):
     if k > len(trainingSet):
         raise ValueError("K cannot exceed the training set size.")
 
@@ -100,104 +99,122 @@ def generateInitialCentroids(trainingSet, k):
 
     centroids = []
 
-    for row in selectedRows:
-        centroids.append(row.copy())
-
+    for spots in selectedRows:
+        centroid = [0.0] * size
+        for s in spots:
+            centroid[s] = 1.0
+        centroids.append(centroid)
     return centroids
-def applyEuclidean(centroid, row):
-    distance = 0
-    for i in range(len(centroid)):
-        distance += (centroid[i] - row[i]) ** 2
-    return math.sqrt(distance)
 
-def applyKmeans(trainingSet, centroids):
+def getNorms(centroids):
+    # sum of the squares of each centroid, we need it for the distance formula
+    norms = []
+    for centroid in centroids:
+        total = 0.0
+        for value in centroid:
+            total += value * value
+        norms.append(total)
+    return norms
+
+def applyEuclidean(spots, centroid, centroidNorm):
+    # centroidNorm - 2 * (sum of the centroid at the row's 1 spots) + (number of 1s)
+    dot = 0.0
+    for s in spots:
+        dot += centroid[s]
+    return centroidNorm - 2 * dot + len(spots)
+
+def findNearestCluster(spots, centroids, norms):
+    # compare the row with every centroid and return the index of the closest one
+    bestCluster = 0
+    bestDistance = applyEuclidean(spots, centroids[0], norms[0])
+    for i in range(1, len(centroids)):
+        distance = applyEuclidean(spots, centroids[i], norms[i])
+        if distance < bestDistance:
+            bestDistance = distance
+            bestCluster = i
+    return bestCluster
+
+def applyKmeans(encodedRows, centroids):
     k = len(centroids)
-    maxIterations= 100
-
-    for iteration in range(maxIterations):
-        #assigns each row to nearest centroid
-        for row in trainingSet:
-            distances = []
-            for centroid in centroids:
-                distance = applyEuclidean(centroid, row["features"])
-                distances.append(distance)
-            cluster_index = distances.index(min(distances))
-            row['cluster'] = cluster_index
-        newCentroids =[]
-
-        for cluster_index in range(k):
-            clusterPoints = [
-                row for row in trainingSet
-                if row["cluster"] == cluster_index
-            ]
-
-            #keep if empty
-            if not clusterPoints:
-                newCentroids.append(centroids[cluster_index].copy())
-                continue
-            numFeatures = len(centroids[cluster_index])
-
-            newCentroid = []
-
-            for feature_index in range(numFeatures):
-                total = sum(
-                    row["features"][feature_index]
-                    for row in clusterPoints
-                )
-
-                average = total/len(clusterPoints)
-                newCentroid.append(average)
-            newCentroids.append(newCentroid)
-        #converged flag
+    size = len(centroids[0])
+    assignments = [0] * len(encodedRows)
+ 
+    for iteration in range(MAX_ITERATIONS):
+        # step 1: assign each row to its nearest centroid
+        norms = getNorms(centroids)
+        for r in range(len(encodedRows)):
+            assignments[r] = findNearestCluster(encodedRows[r], centroids, norms)
+ 
+        # step 2: the new centroid is the average of the rows in the cluster
+        # for one-hot rows the average is just (count of 1s in the spot) / (rows in cluster)
+        counts = []
+        for i in range(k):
+            counts.append([0.0] * size)
+        clusterSizes = [0] * k
+ 
+        for r in range(len(encodedRows)):
+            c = assignments[r]
+            clusterSizes[c] += 1
+            for s in encodedRows[r]:
+                counts[c][s] += 1.0
+ 
+        newCentroids = []
+        for i in range(k):
+            if clusterSizes[i] == 0:
+                # keep the old centroid if nobody joined this cluster
+                newCentroids.append(centroids[i])
+            else:
+                newCentroids.append([value / clusterSizes[i] for value in counts[i]])
+ 
+        # step 3: stop if no centroid moved more than a tiny amount
         converged = True
         for i in range(k):
-            if any(
-                abs(centroids[i][j] - newCentroids[i][j]) > 0.000001
-                for j in range(len(centroids[i]))
-            ):
-                converged = False
+            for j in range(size):
+                if abs(centroids[i][j] - newCentroids[i][j]) > 0.000001:
+                    converged = False
+                    break
+            if not converged:
                 break
+ 
         centroids = newCentroids
-
-        print(f"Iteration {iteration + 1}")
-
-        for i, centroid in enumerate(centroids):
-            print(f"Centroid {i}: {centroid[:5]}...")
-        print("=========")
-
+        print(f"Iteration {iteration + 1}: cluster sizes = {clusterSizes}")
+ 
         if converged:
-            print(f"\nK-means has converged within {iteration + 1} iterations")
+            print(f"K-means converged after {iteration + 1} iterations")
             break
-        print(f"iterating.. {iteration + 1}")
-    return trainingSet, centroids
+ 
+    return assignments, centroids
 
 
-def classifyClusters(trainingSet, k):
+def classifyClusters(assignments, labels, k):
+    # each cluster gets the label that most of its training rows have (majority vote)
     clusterLabels = {}
-    for cluster_index in range(k):
-        clusterPoints = [
-            row for row in trainingSet
-            if row["cluster"] == cluster_index
-        ]
-
-        dynastyCount = sum(
-            row["label"] for row in clusterPoints
-        )
-
-        nonDynastyCount = len(clusterPoints) - dynastyCount
-
-        clusterLabels[cluster_index] = (
-            1 if dynastyCount > nonDynastyCount else 0
-        )
-
-        print(
-            f"Cluster {cluster_index}: "
-            f"Dynasty= {dynastyCount} "     
-            f"Not Dynasty= {nonDynastyCount}"
-            f"Classification={clusterLabels[cluster_index]}"
-        )
-
+    for i in range(k):
+        counts = {}
+        for a, label in zip(assignments, labels):
+            if a == i:
+                counts[label] = counts.get(label, 0) + 1
+ 
+        if len(counts) == 0:
+            # empty cluster, we just say label 0
+            clusterLabels[i] = 0
+        else:
+            # the label with the biggest count wins
+            clusterLabels[i] = max(counts, key=counts.get)
+ 
+        print(f"Cluster {i}: label counts = {counts} -> classified as {clusterLabels[i]}")
+ 
     return clusterLabels
+ 
+ 
+def predictRows(encodedRows, centroids, clusterLabels):
+    # a new row gets the label of the cluster whose centroid is nearest
+    norms = getNorms(centroids)
+    predictions = []
+    for spots in encodedRows:
+        cluster = findNearestCluster(spots, centroids, norms)
+        predictions.append(clusterLabels[cluster])
+    return predictions
 
 
 
@@ -205,56 +222,42 @@ def main():
     try:
         random.seed(RANDOM_SEED)
         k = int(input("Enter K: "))
-
+ 
         if k <= 0:
             print("Error: K must be greater than 0.")
             return
+ 
         officials = preProcessData(FILENAME)
-
         if officials is None:
             return
+ 
         rows = addLabels(officials)
-
         train, test = splitData(rows)
-
-        print(f"\nRows: {len(rows)}")
-        print(f"Training set: {len(train)}")
-        print(f"Testing set: {len(test)}")
-
-        dynasties = sum(row["label"] for row in test)
-        # print(f"Dynasty rows in test set: \n{dynasties / len(test):.1}")
+        print(f"\nRows: {len(rows)} | Training set: {len(train)} | Testing set: {len(test)}")
+ 
+        # turn the rows into numbers
         vocab = generateVocabulary(train, FEATURES)
-        print("Finished generating vocab...")
-        x_train, y_train = getFeatures(train, FEATURES, vocab)
-        print("Acquired training features...")
-        x_test, y_test = getFeatures(test,FEATURES, vocab)
-        print("Acquired test features...")
-        print(f"\nNumber of features: {len(x_train[0])}")
+        x_train, y_train = encodeRows(train, FEATURES, vocab)
+        x_test, y_test = encodeRows(test, FEATURES, vocab)
+        print(f"Number of features (one-hot spots): {len(vocab)}")
         print(f"Number of clusters (K): {k}")
-
-        trainingSet = []
-
-        for features, label in zip(x_train, y_train):
-            trainingSet.append({
-                "features": features,
-                "label": label
-            })
-        print("Appended training set...")
-        #Generate centroids
-        centroids = generateInitialCentroids(x_train, k)
-        print("\nInitial Centroids Generated...")
-        trainingSet, centroids = applyKmeans(trainingSet, centroids)
-
-        print("\n Final centorids calculated.")
-        # for centroid in centroids:
-        #     print(f"Centroid: {centroid}")
-        print("\nCluster Classifications")
-        clusterLabels = classifyClusters(
-            trainingSet,
-            k
-        )
+ 
+        # run k-means on the training rows only
+        centroids = generateInitialCentroids(x_train, k, len(vocab))
+        assignments, centroids = applyKmeans(x_train, centroids)
+ 
+        # give each cluster a label then predict the test rows
+        print("\nCluster classifications")
+        clusterLabels = classifyClusters(assignments, y_train, k)
+        predictions = predictRows(x_test, centroids, clusterLabels)
+ 
+        # all the grading is done by evaluation.py
+        evaluation.printEvaluation(f"k-means (k = {k})", y_test, predictions)
+        evaluation.explainResults(f"k-means (k = {k})", y_test, predictions)
+ 
     except ValueError as e:
         print(f"Error: {e}")
-
+ 
+ 
 if __name__ == "__main__":
     main()

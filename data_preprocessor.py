@@ -35,9 +35,9 @@ def preProcessData(filename):
                 if key not in unique:
                     officials.append(temp_dict)
                     unique.add(key)
-                count +=1
-                if count > 100:
-                    break
+                # count +=1
+                #if count > 100:
+                #    break
                 # Uncomment Else-Block to Track Duplicate Entries.
                 # else:
                 #     duplicate_entries.append(temp_dict) 
