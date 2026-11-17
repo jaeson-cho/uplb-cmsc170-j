@@ -156,10 +156,10 @@ function App() {
         </div>
 
       </div>
-      <div className='flex flex-col gap-4'>
+      <div className='flex flex-col gap-6 py-4 px-4'>
 
         {/* Intro */}
-        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-white p-8 rounded-b-2xl  shadow-xs hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>01. Introduction</h2>
           <p className='leading-8 text-slate-600'>
             Political Dynasties have long since been a significant aspect of Philippine politics which allows certain families to maintain their political influences across multiple generations. According to the 1987 Constitution, it states that the state shall prohibit political dynasties “as may be defined by law”, but no such definition has been enacted. According to Mendoza et al, they found that political dynasties make up over 70% of the Philippine Congress and that they have a worsening effect on poverty in provinces outside Luzon [1]. This leads to corruption, and failure for people seated in power to properly serve the Filipino people. Identifying locations where political dynasties occur can help provide a clearer understanding of the distribution of political power across provinces and cities in the Philippines. This helps us, the Filipino people, to properly scrutinize if the right people are being assigned to the right jobs.
@@ -171,7 +171,7 @@ function App() {
           </p>
         </section>
         {/* Goals */}
-        <section className='mx-2 bg-slate-300 p-8 pb-10 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-slate-300 p-8 pb-10 shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>02. Goals</h2>
           <p className='text-slate-600'>
             Studies have shown that a dynasty isn’t just a yes or no question. Studies separate “thin” dynasties (relatives succeed each other) from “fat” dynasties (relatives hold office at the same time) and “obese” dynasties (extreme fat cases) [7], and report that the fat kind is the one linked to worse poverty outcomes [1]. So our goal is to identify what kind of dynasty presence each local official shows and where it is concentrated. We can expect:
@@ -182,7 +182,7 @@ function App() {
           </p>
         </section>
         {/* Definitions */}
-        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>03. Definitions</h2>
           <p className='text-slate-600'>
             The dataset shows no family relationships so we approximate them using names with a shared Last Name as the sign that two officials are related. Following the evaluation of thin, fat, and obese [7], each city or municipality level winner gets one of the four types. Let n be the number of different people with different First Names with the same Last Name who won in the same province,  city, and year counting the official:
@@ -197,7 +197,7 @@ function App() {
           </p>
         </section>
         {/* Methods */}
-        <section className='mx-2 bg-slate-300 p-8 pb-10 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-slate-300 p-8 pb-10 shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>04. Methods</h2>
           <div className='grid grid-cols-3 gap-2'>
             {/* Naive */}
@@ -231,7 +231,7 @@ function App() {
           </div>
         </section>
         {/* Evaluation Methods */}
-        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>05. Evaluation Methods</h2>
           <p className='text-slate-600'>
             <div className="grid gap-5 md:grid-cols-3">
@@ -251,7 +251,7 @@ function App() {
           </p>
         </section>
         {/* Results */}
-        <section className='mx-2 bg-slate-300  p-8 pb-10  shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-slate-300  p-8 pb-10  shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>06. Results</h2>
           <p className='leading-8 text-slate-600'>
             All methods were tested on the same 49,932 local election winners from the elections after 2016, using the same labels and the same metrics. The baseline always predicts the most common type, “Thin”.
@@ -326,7 +326,7 @@ function App() {
           </div>
         </section>
         {/* Conclusion */}
-        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>07. Conclusion</h2>
           <div className='flex flex-col gap-3 leading-8 text-slate-600'>
             <p>
@@ -341,7 +341,7 @@ function App() {
           </div>
         </section>
         {/* References */}
-        <section className='mx-2 bg-slate-300  p-8 pb-10  shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-slate-300  p-8 pb-10  shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>08. References</h2>
           <div className='text-slate-600 flex flex-col pl-2'>
             <div>
@@ -375,7 +375,7 @@ function App() {
           </div>
         </section>
         {/* AI Use */}
-        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl'>
+        <section className='mx-2 bg-white p-8 shadow-sm rounded-b-2xl hover:shadow-md transition-all duration-200'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>09. AI Usage Disclosure</h2>
           AI tools were used during the development of this project for the following purposes:<br /><br />
           <div className='text-slate-600 flex flex-col px-4'>
