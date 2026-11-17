@@ -4,6 +4,62 @@ import { BlockMath } from "react-katex";
 import "katex/dist/katex.min.css";
 import './App.css'
 import { Brain, Database, Lambda, GitBranch, UserRoundGroup } from 'lucide-react';
+
+const resultRows = [
+  { name: "Always Predict “Thin”", accuracy: 0.647, thin: 1.0, fat: 0.0, obese: 0.0, macro: 0.162, balanced: 0.25, mcc: 0.0, color: "#e5737f" },
+  { name: "Naive Bayes (All Features)", accuracy: 0.515, thin: 0.595, fat: 0.284, obese: 0.24, macro: 0.402, balanced: 0.389, mcc: 0.142, color: "#4f7cf6" },
+  { name: "Naive Bayes (Last Name)", accuracy: 0.534, thin: 0.738, fat: 0.116, obese: 0.0, macro: 0.326, balanced: 0.264, mcc: 0.01, color: "#a78bfa" },
+  { name: "K-Means Clustering", accuracy: 0.613, thin: 0.906, fat: 0.062, obese: 0.0, macro: 0.372, balanced: 0.265, mcc: 0.038, color: "#f0b062" },
+  { name: "K-Nearest Neighbors", accuracy: 0.374, thin: 0.371, fat: 0.018, obese: 0.132, macro: 0.543, balanced: 0.294, mcc: 0.048, color: "#f6d94d" },
+];
+
+const resultColumns = [
+  { key: "accuracy", label: "Accuracy" },
+  { key: "thin", label: "Thin Recall" },
+  { key: "fat", label: "Fat Recall" },
+  { key: "obese", label: "Obese Recall" },
+  { key: "macro", label: "Macro Precision" },
+  { key: "balanced", label: "Balanced Accuracy" },
+  { key: "mcc", label: "MCC" },
+];
+
+function ResultsChart() {
+  const groupWidth = 120, barWidth = 18, top = 20, plotHeight = 260, left = 40;
+  const ticks = [0, 0.25, 0.5, 0.75, 1];
+  return (
+    <svg viewBox="0 0 900 310" className="w-full" role="img"
+      aria-label="Grouped bar chart comparing every method on accuracy, thin, fat and obese recall, macro precision, balanced accuracy and MCC">
+      {ticks.map((t) => {
+        const y = top + plotHeight - t * plotHeight;
+        return (
+          <g key={t}>
+            <line x1={left} x2={880} y1={y} y2={y} stroke="#e2e8f0" />
+            <text x={left - 6} y={y + 4} textAnchor="end" fontSize="11" fill="#64748b">{t.toFixed(2)}</text>
+          </g>
+        );
+      })}
+      {resultColumns.map((col, i) => {
+        const x0 = left + 10 + i * groupWidth;
+        return (
+          <g key={col.key}>
+            {resultRows.map((row, j) => {
+              const h = row[col.key] * plotHeight;
+              return (
+                <rect key={row.name} x={x0 + j * barWidth} y={top + plotHeight - h}
+                  width={barWidth - 2} height={h} fill={row.color}>
+                  <title>{`${row.name}, ${col.label}: ${row[col.key].toFixed(3)}`}</title>
+                </rect>
+              );
+            })}
+            <text x={x0 + (resultRows.length * barWidth) / 2} y={top + plotHeight + 22}
+              textAnchor="middle" fontSize="12" fill="#334155">{col.label}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
 function App() {
   const metrics = [
     {
@@ -130,7 +186,7 @@ function App() {
             <p className='ml-2 mt-2'>3) <strong>Thin</strong>: n is 1 but someone with the same last name won in the same city in a previous election cycle</p>
             <p className='ml-2 mt-2 mb-2'>4) <strong>None</strong>: None of the above</p>
 
-            The labeled rows will start from 2004. This label will be shared by all three methods so the comparison stays fair. Under this rule about 75% are roughly none, 12% are thin, 12% are fat, and 1% are obese. In the later election cycles, the shares are 70-15-14-1 in that order.
+            This label is shared by all three methods so the comparison stays fair. Under this rule, the training rows (elections up to 2016) are about 41% none, 48% thin, 10.5% fat, and 0.6% obese. In the later election cycles used for testing (2019 to 2025), the shares are about 19.8% none, 64.7% thin, 14.3% fat, and 1.2% obese.
 
 
           </p>
@@ -192,12 +248,92 @@ function App() {
         {/* Results */}
         <section className='mx-2 bg-slate-300  p-8 pb-10  shadow-sm'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>06. Results</h2>
-          <p className='text-slate-600'></p>
+          <p className='leading-8 text-slate-600'>
+              All methods were tested on the same 49,932 local election winners from the elections after 2016, using the same labels and the same metrics. The baseline always predicts the most common type, “Thin”.
+          </p>
+          <div className='mt-4 overflow-x-auto rounded-xl bg-white p-4 shadow-sm'>
+            <table className='w-full text-left text-sm text-slate-700'>
+              <thead>
+                <tr className='border-b-2 border-slate-900'>
+                  <th className='py-2 pr-3'>Methods</th>
+                  {resultColumns.map((col) => (
+                    <th key={col.key} className='px-2 py-2 text-right'>{col.label}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {resultRows.map((row, r) => (
+                  <tr key={row.name} className='border-b border-slate-200'>
+                    <td className='py-2 pr-3 font-semibold'>{row.name}</td>
+                    {resultColumns.map((col) => {
+                      // bold the best value of each column, the baseline is not counted
+                      const best = Math.max(...resultRows.slice(1).map((x) => x[col.key]));
+                      const isBest = r > 0 && row[col.key] === best;
+                      return (
+                        <td key={col.key} className={`px-2 py-2 text-right ${isBest ? 'font-bold text-indigo-600' : ''}`}>
+                          {row[col.key].toFixed(3)}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className='mt-4 rounded-xl bg-white p-4 shadow-sm'>
+            <div className='mb-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-slate-600'>
+              {resultRows.map((row) => (
+                <span key={row.name} className='flex items-center gap-2'>
+                  <span className='inline-block h-3 w-3 rounded-sm' style={{ background: row.color }} />
+                  {row.name}
+                </span>
+              ))}
+            </div>
+            <ResultsChart />
+          </div>
+          <h3 className='mb-3 mt-8 text-xl font-semibold text-slate-900'>Interpreting the Table</h3>
+          <div className='flex flex-col gap-3 leading-7 text-slate-600'>
+            <p>
+              <strong>Accuracy is misleading here.</strong> About 64.7% of the test rows are Thin, so the baseline that always answers “Thin” already gets the highest accuracy (0.647). K-Means (0.613) comes close only because it labels most rows as Thin (Thin recall 0.906). KNN has the lowest accuracy (0.374) because it often labels Thin rows as “None” (Thin recall 0.371). Since a high accuracy can come from guessing the biggest type, we judge the methods by the three metrics that treat all four types equally.
+            </p>
+            <p>
+              <strong>Only Naive Bayes with all features finds the rare types.</strong> It recovers 28.4% of Fat and 24.0% of Obese officials. KNN finds only 1.8% of Fat and 13.2% of Obese, K-Means finds 6.2% of Fat and no Obese at all, and Naive Bayes with only the last name also finds no Obese.
+            </p>
+            <p>
+              <strong>KNN has the highest macro precision (0.543), but that is not the whole story.</strong> When KNN does predict a rare type, it is often correct, but it predicts those types so rarely that it misses most of them. Precision alone does not show this, which is why it is read together with recall and balanced accuracy.
+            </p>
+            <p>
+              <strong>Balanced accuracy and MCC show how much each method really learned.</strong> With four types, guessing gives a balanced accuracy of 0.25, which is exactly the baseline. Naive Bayes with all features (0.389) is clearly above it, KNN (0.294) is slightly above, and K-Means (0.265) and Naive Bayes with the last name only (0.264) are barely above it. The MCC tells the same story: Naive Bayes with all features is the best at 0.142, while the other methods score between 0.010 and 0.048. Since an MCC of 0 is guessing and 1 is perfect, even the best method is only weakly better than chance, so none of them predicts the dynasty type reliably yet.
+            </p>
+            <p>
+              <strong>The other features matter.</strong> Adding the province, city, middle name, and position to the last name raises the Naive Bayes MCC from 0.010 to 0.142. The last name alone cannot recognize Obese officials, so the place and position give the model information that names do not.
+            </p>
+          </div>
+
+          <h3 className='mb-3 mt-8 text-xl font-semibold text-slate-900'>Interpreting the Graph</h3>
+          <div className='flex flex-col gap-3 leading-7 text-slate-600'>
+            <p>
+              The tallest bars are the Thin recall of the baseline (1.000) and K-Means (0.906). They are tall because Thin is the biggest group, not because those methods are skilled. The Fat recall and Obese recall bars are almost empty for every method except Naive Bayes with all features, which is the only one that stands out for the rare types.
+            </p>
+            <p>
+              In the macro precision group, KNN is the tallest bar, followed by Naive Bayes with all features. In the balanced accuracy group, Naive Bayes with all features is the tallest and the other methods stay close to the 0.25 baseline. In the MCC group every bar is short, and only Naive Bayes with all features is clearly visible. Reading the graph from left to right, the methods look different on accuracy and recall, but on the fair metrics (balanced accuracy and MCC) the differences are small, and Naive Bayes with all features leads.
+            </p>
+          </div>
         </section>
         {/* Conclusion */}
         <section className='mx-2 bg-white p-8 shadow-sm'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>07. Conclusion</h2>
-          <p className='text-slate-600'></p>
+          <div className='flex flex-col gap-3 leading-8 text-slate-600'>
+            <p>
+              This project changed the question from “is there a political dynasty?” to “what kind of dynasty is it?” by classifying each local official as None, Thin, Fat, or Obese. We compared Naive Bayes, K-Means Clustering, and K-Nearest Neighbors, all written from scratch, using the same labels, the same train-test split (training up to 2016 and testing on the later elections), and the same metrics.
+            </p>
+            <p>
+              Naive Bayes using all features performed best overall. It had the highest balanced accuracy (0.389) and MCC (0.142) and was the only method that found a meaningful share of the Fat and Obese officials. KNN was the most precise on the rare types (macro precision 0.543) but found very few of them. K-Means mostly predicted the majority type, so it behaved close to the baseline (MCC 0.038). The accuracy of the baseline (0.647) was higher than all three methods, which confirms that accuracy alone is not a fair way to judge this task.
+            </p>
+            <p>
+              Even the best result is weak, so names and places alone are not enough to describe dynasties well. Our labels are also a proxy: they use a shared last name to guess family ties, which can wrongly match unrelated people with common surnames, miss relatives with different surnames, and count the same person who is re-elected as Thin. The rare types (Fat and Obese) have far fewer examples than Thin, which makes them harder to learn. Future work could use stricter family matching, add features such as party or number of terms served, give more weight to the rare types during training, and use clustering methods designed for categorical data.
+            </p>
+          </div>
         </section>
         {/* References */}
         <section className='mx-2 bg-white p-8 shadow-sm'>
