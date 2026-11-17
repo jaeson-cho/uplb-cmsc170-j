@@ -1,9 +1,14 @@
 import { useState } from 'react'
 import headerImage from "./assets/pexels-kindelmedia-8566449.jpg"
-import { BlockMath } from "react-katex";
+import katex from "katex";
 import "katex/dist/katex.min.css";
 import './App.css'
-import { Brain, Database, Lambda, GitBranch, UserRoundGroup } from 'lucide-react';
+import { Brain, Database, Lambda, GitBranch, UsersRound } from 'lucide-react';
+
+function BlockMath({ math }) {
+  const html = katex.renderToString(math, { displayMode: true, throwOnError: false });
+  return <div dangerouslySetInnerHTML={{ __html: html }} />;
+}
 
 const resultRows = [
   { name: "Always Predict “Thin”", accuracy: 0.647, thin: 1.0, fat: 0.0, obese: 0.0, macro: 0.162, balanced: 0.25, mcc: 0.0, color: "#e5737f" },
@@ -141,7 +146,7 @@ function App() {
           </div>
           <div className='flex gap-2'><Lambda /> Naive Bayes | K-Means Clustering | K-Nearest Neighbors</div>
           <div className='flex gap-2'><GitBranch /><a href="https://github.com/jaeson-cho/uplb-cmsc170-j.git" className='underline hover:font-blue-600'>https://github.com/jaeson-cho/uplb-cmsc170-j.git </a></div>
-          <div className='flex gap-2'><UserRoundGroup /> Group J - Cho | Licayan | Figuro | Osorio</div>
+          <div className='flex gap-2'><UsersRound /> Group J - Cho | Licayan | Figuro | Osorio</div>
         </div>
         <div className='flex w-1/4 shrink-0 items-center justify-center'>
           <img
