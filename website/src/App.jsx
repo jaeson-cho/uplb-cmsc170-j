@@ -202,7 +202,36 @@ function App() {
         {/* References */}
         <section className='mx-2 bg-white p-8 shadow-sm'>
           <h2 className='mb-6 text-3xl font-bold text-slate-900'>08. References</h2>
-          <p className='text-slate-600'></p>
+          <div className='text-slate-600 flex flex-col pl-2'>
+            <div>
+              [1] Mendoza, R. U., Beja, E. L., Venida, V. S., & Yap, D. B. (2016). Political dynasties and poverty: measurement and evidence of linkages in the Philippines. Oxford Development Studies, 44(2), 189–201. https://doi.org/10.1080/13600818.2016.1169264
+            </div>
+            <div>
+              [2] Berrar, Daniel. (2018). Bayes’ Theorem and Naive Bayes Classifier. 10.1016/B978-0-12-809633-8.20473-1.
+            </div>
+            <div>
+              [3] Tharwat, A. (2021). Classification assessment methods. Applied computing and informatics, 17(1), 168-192.
+            </div>
+            <div>
+              [4] Chicco, D., & Jurman, G. (2020). The advantages of the Matthews correlation coefficient (MCC) over F1 score and accuracy in binary classification evaluation. BMC genomics, 21(1), 6.
+            </div>
+            <div>
+              [5] Shahapure, K. R., & Nicholas, C. (2020, October). Cluster quality analysis using silhouette score. In 2020 IEEE 7th international conference on data science and advanced analytics (DSAA) (pp. 747-748). IEEE.
+            </div>
+            <div>
+              [6] Ikotun, A. M., Ezugwu, A. E., Abualigah, L., Abuhaija, B., & Heming, J. (2023). K-means clustering algorithms: A comprehensive review, variants analysis, and advances in the era of big data. Information Sciences, 622, 178-210.
+            </div>
+            <div>
+              [7] Mendoza, R. U., Jaminola, L. M., & Yap, J. (2019). From fat to obese: Political dynasties after the 2019 midterm elections. Ateneo School of Government working paper series, September, 19-013.
+            </div>
+            <div>
+              [8] Grandini, M., Bagli, E., & Visani, G. (2020). Metrics for multi-class classification: an overview. arXiv preprint arXiv:2008.05756.
+            </div>
+            <div>
+              [9] Tharwat, A. (2021). Classification assessment methods. Applied computing and informatics, 17(1), 168-192.
+            </div>
+
+          </div>
         </section>
         {/* AI Use */}
         <section className='mx-2 bg-white p-8 shadow-sm'>
