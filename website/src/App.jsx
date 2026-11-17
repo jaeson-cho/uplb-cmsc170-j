@@ -220,7 +220,7 @@ function App() {
               &nbsp;&nbsp;&nbsp;&nbsp; 3) <strong>Elimination of tedious and repetitive code</strong>: For code that is already implemented but must be repeated throughout.
             </div>
             <div>
-              &nbsp;&nbsp;&nbsp;&nbsp; 4) <strong>Project Website enhancement</strong>: For color coordination, UI debugging, layout issues, and styling. All of which are from the developer's implementation and are further enhanced.
+              &nbsp;&nbsp;&nbsp;&nbsp; 4) <strong>Project Website enhancement</strong>: For color coordination, UI debugging, layout issues, and styling. All of which are from the developer's implementation and are further enhanced. Additionally, AI was used to help convert formula to BlockMath for better visuals.
             </div>
           </div >
         </section>
